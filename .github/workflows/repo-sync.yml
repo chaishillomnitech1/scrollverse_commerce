@@ -138,9 +138,11 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             git add .
             git commit -m "sync: Update from scrollverse_commerce - $(git -C .. log -1 --pretty=%B | head -n1)"
+            cd ..
             echo "changes_made=true" >> $GITHUB_OUTPUT
           else
             echo "No changes to sync"
+            cd ..
             echo "changes_made=false" >> $GITHUB_OUTPUT
           fi
 

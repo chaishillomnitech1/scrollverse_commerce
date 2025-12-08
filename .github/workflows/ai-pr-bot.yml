@@ -44,7 +44,8 @@ jobs:
             
             if (!openaiKey) {
               console.log('⚠️ OPENAI_API_KEY not configured. Skipping AI review.');
-              return '';
+              core.setOutput('result', '');
+              return;
             }
 
             const fs = require('fs');
@@ -92,10 +93,12 @@ jobs:
 
               const data = await response.json();
               const review = data.choices[0].message.content;
-              return review;
+              core.setOutput('result', review);
+              return;
             } catch (error) {
               console.error('Error calling OpenAI API:', error);
-              return '⚠️ AI review could not be completed due to an API error.';
+              core.setOutput('result', '⚠️ AI review could not be completed due to an API error.');
+              return;
             }
 
       - name: Post AI review as comment
