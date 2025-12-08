@@ -1,0 +1,14 @@
+# Default code owners for all files
+* @chaishillomnitech1
+
+# Specific ownership patterns (can be extended as needed)
+/.github/ @chaishillomnitech1
+/app/ @chaishillomnitech1
+/components/ @chaishillomnitech1
+/lib/ @chaishillomnitech1
+
+# Configuration files
+*.json @chaishillomnitech1
+*.yml @chaishillomnitech1
+*.yaml @chaishillomnitech1
+*.md @chaishillomnitech1

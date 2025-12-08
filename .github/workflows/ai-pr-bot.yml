@@ -1,0 +1,134 @@
+name: AI PR Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get PR diff
+        id: pr-diff
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD > /tmp/pr-diff.txt
+          # Limit diff size for security
+          head -c 50000 /tmp/pr-diff.txt > /tmp/pr-diff-limited.txt
+
+      - name: Analyze code with AI
+        id: ai-analysis
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          script: |
+            const openaiKey = process.env.OPENAI_API_KEY;
+            
+            if (!openaiKey) {
+              console.log('⚠️ OPENAI_API_KEY not configured. Skipping AI review.');
+              core.setOutput('result', '');
+              return;
+            }
+
+            const fs = require('fs');
+            const prDiff = fs.readFileSync('/tmp/pr-diff-limited.txt', 'utf8');
+            const prTitle = context.payload.pull_request.title;
+            const prBody = context.payload.pull_request.body || '';
+            
+            // Conservative prompt settings - focus on obvious issues only
+            const prompt = `You are a helpful code reviewer. Review this pull request conservatively, focusing only on:
+            1. Critical bugs or security issues
+            2. Obvious logic errors
+            3. Best practice violations that could cause problems
+            
+            Be concise and constructive. Only comment if you find actual issues.
+            
+            PR Title: ${prTitle.substring(0, 200)}
+            PR Description: ${prBody.substring(0, 500)}
+            
+            Code Changes:
+            ${prDiff.substring(0, 8000)}
+            
+            Provide a brief review (max 500 words). If the code looks good, say so briefly.`;
+
+            try {
+              const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${openaiKey}`
+                },
+                body: JSON.stringify({
+                  model: 'gpt-3.5-turbo',
+                  messages: [
+                    { role: 'system', content: 'You are a conservative, helpful code reviewer.' },
+                    { role: 'user', content: prompt }
+                  ],
+                  temperature: 0.3,
+                  max_tokens: 800
+                })
+              });
+
+              if (!response.ok) {
+                throw new Error(`OpenAI API error: ${response.status}`);
+              }
+
+              const data = await response.json();
+              const review = data.choices[0].message.content;
+              core.setOutput('result', review);
+              return;
+            } catch (error) {
+              console.error('Error calling OpenAI API:', error);
+              core.setOutput('result', '⚠️ AI review could not be completed due to an API error.');
+              return;
+            }
+
+      - name: Post AI review as comment
+        if: steps.ai-analysis.outputs.result != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const aiReview = `${{ steps.ai-analysis.outputs.result }}`;
+            
+            if (!aiReview || aiReview.includes('OPENAI_API_KEY not configured')) {
+              return;
+            }
+
+            const comment = `## 🤖 AI Code Review
+
+${aiReview}
+
+---
+*This is an automated review. Please use your judgment and human review for final decisions.*
+*Settings: Conservative mode, no auto-merge, GPT-3.5-turbo*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Summary
+        run: |
+          echo "✅ AI PR review completed"
+          echo "⚙️ Settings: Conservative prompts, no auto-merge"
+          echo "🔒 Security: No secrets exposed, output posted as PR comment only"
