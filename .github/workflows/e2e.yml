@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       deployment_url:
-        description: 'Deployment URL to test'
+        description: "Deployment URL to test"
         required: true
-        default: 'https://scrollverse-commerce.vercel.app'
+        default: "https://scrollverse-commerce.vercel.app"
   schedule:
     # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 jobs:
   e2e-tests:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -69,9 +69,9 @@ jobs:
             const message = testStatus === 'success' 
               ? `✅ E2E tests passed for deployment: ${deploymentUrl}`
               : `❌ E2E tests failed for deployment: ${deploymentUrl}\n\nPlease review the workflow logs for details.`;
-            
+
             console.log(message);
-            
+
             // Create an issue if tests fail on scheduled runs
             if (testStatus !== 'success' && '${{ github.event_name }}' === 'schedule') {
               github.rest.issues.create({

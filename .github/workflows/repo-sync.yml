@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       target_repo:
-        description: 'Target repository (owner/repo)'
+        description: "Target repository (owner/repo)"
         required: true
-        default: 'chaishillomnitech1/scrollverse-hub'
+        default: "chaishillomnitech1/scrollverse-hub"
       sync_branch:
-        description: 'Branch to sync'
+        description: "Branch to sync"
         required: true
-        default: 'main'
+        default: "main"
 
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Configure Git
         run: |
@@ -51,7 +51,7 @@ jobs:
             TARGET_REPO="chaishillomnitech1/scrollverse-hub"
             SYNC_BRANCH="main"
           fi
-          
+
           echo "target_repo=${TARGET_REPO}" >> $GITHUB_OUTPUT
           echo "sync_branch=${SYNC_BRANCH}" >> $GITHUB_OUTPUT
           echo "Syncing to: ${TARGET_REPO}:${SYNC_BRANCH}"
@@ -61,7 +61,7 @@ jobs:
         run: |
           # Get the last commit message
           LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
-          
+
           # Skip sync if commit message contains [skip-sync] or [no-sync]
           if echo "$LAST_COMMIT_MSG" | grep -qE "\[skip-sync\]|\[no-sync\]"; then
             echo "sync_needed=false" >> $GITHUB_OUTPUT
@@ -78,14 +78,14 @@ jobs:
           # Identify files/directories to sync
           # Only sync specific directories that are relevant across repos
           SYNC_DIRS=".github/workflows shared-config docs"
-          
+
           echo "sync_dirs=${SYNC_DIRS}" >> $GITHUB_OUTPUT
-          
+
           # Get list of changed files in last commit
           CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
           echo "Changed files:"
           echo "$CHANGED_FILES"
-          
+
           # Check if any syncable files were changed
           SYNCABLE_CHANGES=false
           for dir in $SYNC_DIRS; do
@@ -94,7 +94,7 @@ jobs:
               break
             fi
           done
-          
+
           echo "syncable_changes=${SYNCABLE_CHANGES}" >> $GITHUB_OUTPUT
 
       - name: Clone target repository
@@ -103,12 +103,12 @@ jobs:
           GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
         run: |
           TARGET_REPO="${{ steps.sync-targets.outputs.target_repo }}"
-          
+
           if [ -z "$GITHUB_PAT" ]; then
             echo "⚠️ GITHUB_PAT not configured. Cannot sync to external repository."
             exit 0
           fi
-          
+
           echo "Cloning ${TARGET_REPO}..."
           git clone "https://x-access-token:${GITHUB_PAT}@github.com/${TARGET_REPO}.git" target-repo
           cd target-repo
@@ -121,9 +121,9 @@ jobs:
             echo "Target repository not cloned, skipping sync"
             exit 0
           fi
-          
+
           SYNC_DIRS="${{ steps.extract-changes.outputs.sync_dirs }}"
-          
+
           for dir in $SYNC_DIRS; do
             if [ -d "$dir" ]; then
               echo "Syncing ${dir}..."
@@ -131,9 +131,9 @@ jobs:
               cp -r "${dir}"/* "target-repo/${dir}/" || true
             fi
           done
-          
+
           cd target-repo
-          
+
           # Check if there are changes to commit
           if [ -n "$(git status --porcelain)" ]; then
             git add .
@@ -154,19 +154,19 @@ jobs:
           if [ ! -d "target-repo" ]; then
             exit 0
           fi
-          
+
           if [ -z "$GITHUB_PAT" ]; then
             echo "⚠️ GITHUB_PAT not configured. Cannot push to external repository."
             exit 0
           fi
-          
+
           cd target-repo
-          
+
           # Check for local changes or commits ahead of remote
           git fetch origin "${{ steps.sync-targets.outputs.sync_branch }}" 2>/dev/null || true
           HAS_CHANGES=$(git status --porcelain)
           HAS_COMMITS=$(git log origin/${{ steps.sync-targets.outputs.sync_branch }}..HEAD 2>/dev/null | wc -l || echo "0")
-          
+
           if [ -n "$HAS_CHANGES" ] || [ "$HAS_COMMITS" -gt 0 ]; then
             echo "Pushing changes..."
             git push origin "${{ steps.sync-targets.outputs.sync_branch }}"
@@ -183,9 +183,9 @@ jobs:
             const syncNeeded = '${{ steps.check-sync.outputs.sync_needed }}';
             const syncableChanges = '${{ steps.extract-changes.outputs.syncable_changes }}';
             const targetRepo = '${{ steps.sync-targets.outputs.target_repo }}';
-            
+
             let summary = '## 🔄 Repository Sync Report\n\n';
-            
+
             if (syncNeeded === 'false') {
               summary += '⏭️ Sync skipped due to [skip-sync] or [no-sync] flag in commit message.\n';
             } else if (syncableChanges === 'false') {
@@ -194,7 +194,7 @@ jobs:
               summary += `✅ Changes synced to ${targetRepo}\n`;
               summary += `📁 Synced directories: ${{ steps.extract-changes.outputs.sync_dirs }}\n`;
             }
-            
+
             console.log(summary);
 
       - name: Summary

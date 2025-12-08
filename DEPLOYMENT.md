@@ -16,14 +16,17 @@ This document provides instructions for deploying the scrollverse_commerce appli
 Before running the automated workflows, configure the following secrets in GitHub repository settings (Settings > Secrets and variables > Actions):
 
 ### Vercel Deployment
+
 - `VERCEL_TOKEN` - Vercel API token for deployment automation
 - `VERCEL_ORG_ID` - Your Vercel organization ID
 - `VERCEL_PROJECT_ID` - Your Vercel project ID
 
 ### AI PR Bot
+
 - `OPENAI_API_KEY` - OpenAI API key for AI-powered PR reviews
 
 ### Rewards & NFT Minting
+
 - `REWARDS_PRIVATE_KEY` - Private key for test wallet (Mumbai testnet)
 - `ALCHEMY_MUMBAI_URL` - Alchemy API URL for Mumbai testnet
 - `REWARDS_API_KEY` - API key for rewards service
@@ -31,6 +34,7 @@ Before running the automated workflows, configure the following secrets in GitHu
 - `PILOT_TEST_WALLET` - Test wallet address for pilot program
 
 ### Repository Sync
+
 - `GITHUB_PAT` - GitHub Personal Access Token with repo access for cross-repo sync
 
 ## Vercel Setup
@@ -63,6 +67,7 @@ SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
 **Note on `.vercel.json` environment references:** The `.vercel.json` file uses the `@variable_name` syntax to reference environment variables that should be configured in the Vercel dashboard. These are not literal values but references to environment variables you must set up in your Vercel project settings. For example, `"@company_name"` refers to a Vercel environment variable named `COMPANY_NAME`.
 
 Add any additional Phase 2 environment variables as needed:
+
 - `REWARDS_CONTRACT_ADDRESS`
 - `ALCHEMY_MUMBAI_URL` (or production URL)
 - `REWARDS_API_KEY`
@@ -164,6 +169,7 @@ Syncs changes across related repositories in the organization.
 ## Support
 
 For issues or questions:
+
 - Create an issue using `.github/ISSUE_TEMPLATE/vercel-setup.md`
 - Contact @chaishillomnitech1
 - Check Vercel documentation: https://vercel.com/docs
