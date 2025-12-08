@@ -144,13 +144,15 @@ jobs:
               console.log(`New balance: ${ethers.formatEther(balance)} tokens`);
 
               // Output for GitHub Actions
-              console.log(`::set-output name=tx_hash::${tx.hash}`);
-              console.log(`::set-output name=success::true`);
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `tx_hash=${tx.hash}\n`);
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `success=true\n`);
 
             } catch (error) {
               console.error('Error minting rewards:', error.message);
-              console.log('::set-output name=success::false');
-              console.log(`::set-output name=error::${error.message}`);
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `success=false\n`);
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `error=${error.message}\n`);
               process.exit(1);
             }
           }

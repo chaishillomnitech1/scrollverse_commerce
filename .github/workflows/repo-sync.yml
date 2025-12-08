@@ -95,6 +95,7 @@ jobs:
           echo "sync_paths=$PATHS_STR" >> $GITHUB_OUTPUT
 
       - name: Pull from template repository
+        id: pull
         if: steps.direction.outputs.direction == 'pull'
         env:
           TEMPLATE_REPO: ${{ steps.config.outputs.template_repo }}
@@ -149,6 +150,7 @@ jobs:
           fi
 
       - name: Push to template repository
+        id: push
         if: steps.direction.outputs.direction == 'push'
         env:
           TEMPLATE_REPO: ${{ steps.config.outputs.template_repo }}
@@ -203,7 +205,8 @@ jobs:
       - name: Create PR for pulled changes
         if: |
           steps.direction.outputs.direction == 'pull' &&
-          steps.pull.outputs.has_changes == 'true'
+          steps.pull.outputs.has_changes == 'true' &&
+          steps.pull.outputs.skipped != 'true'
         env:
           GH_TOKEN: ${{ secrets.REPO_SYNC_TOKEN || github.token }}
         run: |
