@@ -51,6 +51,7 @@ Before deploying Phase 2, ensure you have:
 **Triggers**: When a PR is opened, synchronized, or reopened
 
 **Features**:
+
 - Analyzes PR diffs using GPT-4
 - Generates concise summaries
 - Suggests relevant labels
@@ -59,6 +60,7 @@ Before deploying Phase 2, ensure you have:
 - Posts results as PR comments
 
 **Benefits**:
+
 - Reduces manual PR review overhead
 - Ensures consistent PR documentation
 - Improves changelog accuracy
@@ -71,6 +73,7 @@ Before deploying Phase 2, ensure you have:
 **Triggers**: When a PR is closed (only executes if merged)
 
 **Features**:
+
 - Calculates rewards based on PR complexity (lines changed, files modified)
 - Mints OMNI tokens on Polygon Mumbai testnet
 - Posts transaction details in PR comments
@@ -79,6 +82,7 @@ Before deploying Phase 2, ensure you have:
 - Graceful error handling with notifications
 
 **Reward Calculation**:
+
 ```
 Base Reward: 1 OMNI token
 Complexity Score: (additions + deletions) / 100 + changed_files
@@ -87,6 +91,7 @@ Final Reward: base + (base * complexity / 100)
 ```
 
 **Benefits**:
+
 - Incentivizes quality contributions
 - Transparent reward system
 - Automated token distribution
@@ -97,11 +102,13 @@ Final Reward: base + (base * complexity / 100)
 **File**: `.github/workflows/repo-sync.yml`
 
 **Triggers**:
+
 - Manual workflow dispatch (pull or push)
 - Automatic push on main branch updates (specific paths)
 - Weekly scheduled pull (Sundays at midnight UTC)
 
 **Features**:
+
 - Bidirectional sync (pull from or push to template repository)
 - Selective file/directory synchronization
 - Automatic PR creation for pulled changes
@@ -109,11 +116,13 @@ Final Reward: base + (base * complexity / 100)
 - Supports private template repositories
 
 **Synced Files**:
+
 - Workflow files (`.github/workflows/`)
 - Deployment documentation (`DEPLOYMENT.md`)
 - Security documentation (`SECURITY.md`)
 
 **Benefits**:
+
 - Centralized workflow management
 - Consistent standards across repositories
 - Easy rollout of updates
@@ -127,24 +136,24 @@ Configure the following secrets in your repository settings (`Settings > Secrets
 
 ### AI-Powered PR Assistant
 
-| Secret Name | Description | Required | Example |
-|------------|-------------|----------|---------|
-| `OPENAI_API_KEY` | OpenAI API key for GPT-4 access | ✅ Yes | `sk-...` |
+| Secret Name      | Description                     | Required | Example  |
+| ---------------- | ------------------------------- | -------- | -------- |
+| `OPENAI_API_KEY` | OpenAI API key for GPT-4 access | ✅ Yes   | `sk-...` |
 
 ### Reward Allocation
 
-| Secret Name | Description | Required | Example |
-|------------|-------------|----------|---------|
-| `ALCHEMY_MUMBAI_URL` | Alchemy RPC URL for Polygon Mumbai | ✅ Yes | `https://polygon-mumbai.g.alchemy.com/v2/...` |
-| `REWARDS_PRIVATE_KEY` | Private key for reward distribution wallet | ✅ Yes | `0x...` (64 hex chars) |
-| `OMNIREWARDS_CONTRACT_ADDRESS` | Deployed OmniRewards contract address | ✅ Yes | `0x...` (40 hex chars) |
-| `DEFAULT_REWARDS_ADDRESS` | Fallback address for rewards | ⚠️ Recommended | `0x...` |
-| `DEPLOYMENT_STAGE` | Deployment environment (`staging` or `production`) | ⚠️ Recommended | `staging` |
+| Secret Name                    | Description                                        | Required       | Example                                       |
+| ------------------------------ | -------------------------------------------------- | -------------- | --------------------------------------------- |
+| `ALCHEMY_MUMBAI_URL`           | Alchemy RPC URL for Polygon Mumbai                 | ✅ Yes         | `https://polygon-mumbai.g.alchemy.com/v2/...` |
+| `REWARDS_PRIVATE_KEY`          | Private key for reward distribution wallet         | ✅ Yes         | `0x...` (64 hex chars)                        |
+| `OMNIREWARDS_CONTRACT_ADDRESS` | Deployed OmniRewards contract address              | ✅ Yes         | `0x...` (40 hex chars)                        |
+| `DEFAULT_REWARDS_ADDRESS`      | Fallback address for rewards                       | ⚠️ Recommended | `0x...`                                       |
+| `DEPLOYMENT_STAGE`             | Deployment environment (`staging` or `production`) | ⚠️ Recommended | `staging`                                     |
 
 ### Repo-Sync Action
 
-| Secret Name | Description | Required | Example |
-|------------|-------------|----------|---------|
+| Secret Name       | Description                           | Required             | Example   |
+| ----------------- | ------------------------------------- | -------------------- | --------- |
 | `REPO_SYNC_TOKEN` | Personal Access Token with repo scope | ⚠️ For private repos | `ghp_...` |
 
 ---
@@ -158,12 +167,14 @@ The workflow files are already in place in `.github/workflows/`. No action neede
 ### Step 2: Configure AI PR Assistant
 
 1. **Obtain OpenAI API Key**:
+
    - Visit [OpenAI Platform](https://platform.openai.com/)
    - Navigate to API Keys section
    - Create new secret key
    - Copy the key (starts with `sk-`)
 
 2. **Add to Repository Secrets**:
+
    ```
    Name: OPENAI_API_KEY
    Value: sk-your-actual-key-here
@@ -188,14 +199,17 @@ The workflow files are already in place in `.github/workflows/`. No action neede
 #### 3.2 Deploy or Locate OmniRewards Contract
 
 **Option A: Use Existing Contract**
+
 - If already deployed, obtain the contract address from your team
 
 **Option B: Deploy New Contract**
+
 - Use the OmniRewards smart contract from omnitech-templates
 - Deploy to Polygon Mumbai testnet
 - Verify on PolygonScan Mumbai
 
 **Minimal Contract Interface Required**:
+
 ```solidity
 interface IOmniRewards {
     function mint(address to, uint256 amount) external returns (bool);
@@ -206,11 +220,13 @@ interface IOmniRewards {
 #### 3.3 Setup Rewards Wallet
 
 1. **Create or Use Existing Wallet**:
+
    - Use MetaMask or similar
    - Ensure it has Mumbai testnet MATIC for gas
    - Grant this wallet `MINTER_ROLE` on the OmniRewards contract
 
 2. **Export Private Key**:
+
    - ⚠️ **CRITICAL**: Never share or commit this key
    - Export from wallet (64 hexadecimal characters)
    - May or may not include `0x` prefix
@@ -250,11 +266,13 @@ Value: staging
 The repo-sync workflow works out of the box for public template repositories. For additional features:
 
 1. **For Private Template Repositories**:
+
    - Create GitHub Personal Access Token
    - Grant `repo` scope
    - Add as `REPO_SYNC_TOKEN` secret
 
 2. **Configure Template Repository**:
+
    - Edit `.github/workflows/repo-sync.yml`
    - Update `TEMPLATE_REPO` variable (line ~67)
    - Update `SYNC_PATHS` array (line ~72-77)
@@ -322,6 +340,7 @@ All workflows follow the principle of least privilege:
 ### Test Scenarios
 
 #### AI PR Assistant Test
+
 1. Create a small test PR (e.g., update README)
 2. Verify comment appears within 3 minutes
 3. Check summary accuracy
@@ -329,6 +348,7 @@ All workflows follow the principle of least privilege:
 5. Review changelog format
 
 #### Reward Allocation Test
+
 1. Create and merge a small test PR
 2. Verify reward calculation comment
 3. Check transaction hash in comment
@@ -336,6 +356,7 @@ All workflows follow the principle of least privilege:
 5. Confirm token balance update
 
 #### Repo-Sync Test
+
 1. Trigger manual workflow run
 2. Select "pull" direction
 3. Verify PR is created (if changes exist)
@@ -351,6 +372,7 @@ All workflows follow the principle of least privilege:
 **Problem**: No comment appears on PR
 
 **Solutions**:
+
 - Verify `OPENAI_API_KEY` is set correctly
 - Check OpenAI API quota/billing
 - Review workflow run logs in Actions tab
@@ -360,6 +382,7 @@ All workflows follow the principle of least privilege:
 **Problem**: Generic or incorrect summary
 
 **Solutions**:
+
 - Verify PR description is clear
 - Check if diff was truncated (noted in comment)
 - Review token limits in workflow
@@ -370,6 +393,7 @@ All workflows follow the principle of least privilege:
 **Problem**: Configuration warning appears
 
 **Solutions**:
+
 - Verify all required secrets are set
 - Check secret names match exactly (case-sensitive)
 - Ensure no extra spaces in secret values
@@ -378,6 +402,7 @@ All workflows follow the principle of least privilege:
 **Problem**: Transaction fails
 
 **Solutions**:
+
 - Verify wallet has Mumbai MATIC for gas
 - Check wallet has MINTER_ROLE on contract
 - Verify contract address is correct
@@ -388,6 +413,7 @@ All workflows follow the principle of least privilege:
 **Problem**: Wrong reward amount
 
 **Solutions**:
+
 - Review reward calculation logic
 - Check PR metrics (additions, deletions, files)
 - Verify complexity cap is applied
@@ -398,6 +424,7 @@ All workflows follow the principle of least privilege:
 **Problem**: Sync fails with permission error
 
 **Solutions**:
+
 - Verify `REPO_SYNC_TOKEN` has `repo` scope
 - Check token hasn't expired
 - Ensure token has access to template repository
@@ -406,6 +433,7 @@ All workflows follow the principle of least privilege:
 **Problem**: No changes detected
 
 **Solutions**:
+
 - Verify template repository has updates
 - Check `SYNC_PATHS` configuration
 - Ensure branch names match
@@ -418,17 +446,20 @@ All workflows follow the principle of least privilege:
 ### Regular Tasks
 
 **Weekly**:
+
 - Review workflow execution logs
 - Monitor OpenAI API usage and costs
 - Check reward wallet balance (refill if needed)
 
 **Monthly**:
+
 - Audit successful/failed workflow runs
 - Review reward distribution fairness
 - Update reward calculation if needed
 - Verify all secrets are still valid
 
 **Quarterly**:
+
 - Rotate API keys and secrets
 - Review and update guardrails
 - Assess workflow performance metrics
@@ -439,11 +470,13 @@ All workflows follow the principle of least privilege:
 When ready to move from staging to production:
 
 1. **Deploy Production Contract**:
+
    - Deploy OmniRewards to Polygon mainnet
    - Verify contract on PolygonScan
    - Grant MINTER_ROLE to production wallet
 
 2. **Update Secrets**:
+
    ```
    ALCHEMY_MUMBAI_URL → ALCHEMY_POLYGON_URL
    OMNIREWARDS_CONTRACT_ADDRESS → Production address
@@ -452,6 +485,7 @@ When ready to move from staging to production:
    ```
 
 3. **Update Workflow**:
+
    - Edit `reward-allocation.yml`
    - Update network references (Mumbai → Polygon)
    - Increase reward amounts if desired
@@ -477,6 +511,7 @@ Consider setting up:
 ## Support and Resources
 
 ### Documentation
+
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
 - [Polygon Developer Docs](https://docs.polygon.technology/)
@@ -494,6 +529,7 @@ Consider setting up:
 ## Changelog
 
 ### Phase 2.0 (Current)
+
 - Initial deployment of three core workflows
 - AI-powered PR assistant with OpenAI integration
 - Testnet reward allocation system

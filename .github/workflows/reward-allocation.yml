@@ -14,11 +14,11 @@ jobs:
     # Only run if PR was merged (not just closed)
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    
+
     env:
       # Deployment stage (staging/production)
       DEPLOYMENT_STAGE: ${{ secrets.DEPLOYMENT_STAGE || 'staging' }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: |
@@ -37,19 +37,19 @@ jobs:
         id: validate
         run: |
           MISSING_VARS=""
-          
+
           if [ -z "${{ secrets.ALCHEMY_MUMBAI_URL }}" ]; then
             MISSING_VARS="${MISSING_VARS}- ALCHEMY_MUMBAI_URL\n"
           fi
-          
+
           if [ -z "${{ secrets.REWARDS_PRIVATE_KEY }}" ]; then
             MISSING_VARS="${MISSING_VARS}- REWARDS_PRIVATE_KEY\n"
           fi
-          
+
           if [ -z "${{ secrets.OMNIREWARDS_CONTRACT_ADDRESS }}" ]; then
             MISSING_VARS="${MISSING_VARS}- OMNIREWARDS_CONTRACT_ADDRESS\n"
           fi
-          
+
           if [ ! -z "$MISSING_VARS" ]; then
             echo "missing=true" >> $GITHUB_OUTPUT
             echo "vars<<EOF" >> $GITHUB_OUTPUT
@@ -66,24 +66,24 @@ jobs:
           PR_ADDITIONS=${{ github.event.pull_request.additions }}
           PR_DELETIONS=${{ github.event.pull_request.deletions }}
           PR_CHANGED_FILES=${{ github.event.pull_request.changed_files }}
-          
+
           # Base reward (in wei, 1 token = 10^18 wei)
           BASE_REWARD=1000000000000000000  # 1 token
-          
+
           # Calculate complexity score
           COMPLEXITY=$(( (PR_ADDITIONS + PR_DELETIONS) / 100 + PR_CHANGED_FILES ))
-          
+
           # Cap complexity at 50 for fairness
           if [ $COMPLEXITY -gt 50 ]; then
             COMPLEXITY=50
           fi
-          
+
           # Calculate final reward (base + complexity bonus)
           REWARD=$(( BASE_REWARD + (BASE_REWARD * COMPLEXITY / 100) ))
-          
+
           echo "amount=$REWARD" >> $GITHUB_OUTPUT
           echo "complexity=$COMPLEXITY" >> $GITHUB_OUTPUT
-          
+
           # Convert to human-readable format
           REWARD_TOKENS=$(echo "scale=2; $REWARD / 1000000000000000000" | bc)
           echo "tokens=$REWARD_TOKENS" >> $GITHUB_OUTPUT
@@ -99,54 +99,54 @@ jobs:
           # Create mint script
           cat << 'SCRIPT_EOF' > mint_rewards.js
           const { ethers } = require('ethers');
-          
+
           async function mintRewards() {
             try {
               // Connect to network
               const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_MUMBAI_URL);
               const wallet = new ethers.Wallet(process.env.REWARDS_PRIVATE_KEY, provider);
-              
+
               // OmniRewards contract ABI (simplified)
               const contractABI = [
                 "function mint(address to, uint256 amount) public returns (bool)",
                 "function balanceOf(address account) public view returns (uint256)"
               ];
-              
+
               const contract = new ethers.Contract(
                 process.env.CONTRACT_ADDRESS,
                 contractABI,
                 wallet
               );
-              
+
               // Get recipient address
               const recipient = process.env.PR_AUTHOR_ADDRESS || wallet.address;
               const amount = process.env.REWARD_AMOUNT;
-              
+
               console.log(`Minting ${amount} wei to ${recipient}...`);
-              
+
               // Add guardrails - check staging vs production
               if (process.env.DEPLOYMENT_STAGE === 'production') {
                 console.log('PRODUCTION MODE: Executing real transaction');
               } else {
                 console.log('STAGING MODE: Executing testnet transaction');
               }
-              
+
               // Mint tokens
               const tx = await contract.mint(recipient, amount);
               console.log(`Transaction hash: ${tx.hash}`);
-              
+
               // Wait for confirmation
               const receipt = await tx.wait();
               console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
-              
+
               // Check new balance
               const balance = await contract.balanceOf(recipient);
               console.log(`New balance: ${ethers.formatEther(balance)} tokens`);
-              
+
               // Output for GitHub Actions
               console.log(`::set-output name=tx_hash::${tx.hash}`);
               console.log(`::set-output name=success::true`);
-              
+
             } catch (error) {
               console.error('Error minting rewards:', error.message);
               console.log('::set-output name=success::false');
@@ -154,15 +154,15 @@ jobs:
               process.exit(1);
             }
           }
-          
+
           mintRewards();
           SCRIPT_EOF
-          
+
           # Get PR author's crypto address (from user profile or default to contract owner)
           # In production, this would query a database or user profile
           export PR_AUTHOR_ADDRESS="${{ secrets.DEFAULT_REWARDS_ADDRESS }}"
           export REWARD_AMOUNT="${{ steps.reward.outputs.amount }}"
-          
+
           # Run the minting script
           node mint_rewards.js
 
@@ -173,25 +173,25 @@ jobs:
         run: |
           cat << 'EOF' > reward_comment.md
           ## 🎉 Reward Allocated!
-          
+
           Congratulations @${{ github.event.pull_request.user.login }}! Your PR has been merged and rewards have been allocated.
-          
+
           ### Reward Details
           - **Amount**: ${{ steps.reward.outputs.tokens }} OMNI tokens
           - **Complexity Score**: ${{ steps.reward.outputs.complexity }}
           - **Transaction**: `${{ steps.mint.outputs.tx_hash }}`
           - **Network**: Polygon Mumbai Testnet
           - **Stage**: `${{ env.DEPLOYMENT_STAGE }}`
-          
+
           ### PR Metrics
           - **Additions**: ${{ github.event.pull_request.additions }}
           - **Deletions**: ${{ github.event.pull_request.deletions }}
           - **Files Changed**: ${{ github.event.pull_request.changed_files }}
-          
+
           ---
           *Rewards are calculated based on PR complexity and impact. View transaction on [PolygonScan](https://mumbai.polygonscan.com/tx/${{ steps.mint.outputs.tx_hash }}).*
           EOF
-          
+
           gh pr comment ${{ github.event.pull_request.number }} --body-file reward_comment.md
 
       - name: Post configuration warning
@@ -201,16 +201,16 @@ jobs:
         run: |
           cat << 'EOF' > warning_comment.md
           ## ⚠️ Reward Allocation Skipped
-          
+
           This PR was merged, but reward allocation is not yet configured.
-          
+
           ### Missing Configuration
           Please add the following secrets to enable reward allocation:
           ${{ steps.validate.outputs.vars }}
-          
+
           See [DEPLOYMENT.md](../blob/main/DEPLOYMENT.md) for setup instructions.
           EOF
-          
+
           gh pr comment ${{ github.event.pull_request.number }} --body-file warning_comment.md
 
       - name: Handle minting errors
@@ -220,12 +220,12 @@ jobs:
         run: |
           cat << 'EOF' > error_comment.md
           ## ⚠️ Reward Allocation Failed
-          
+
           An error occurred while allocating rewards for this PR.
-          
+
           **Error**: ${{ steps.mint.outputs.error }}
-          
+
           The team has been notified and will investigate. You may still receive your rewards manually.
           EOF
-          
+
           gh pr comment ${{ github.event.pull_request.number }} --body-file error_comment.md
