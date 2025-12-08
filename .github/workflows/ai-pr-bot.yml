@@ -29,10 +29,9 @@ jobs:
         id: pr-diff
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }}
-          DIFF=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD)
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          echo "$DIFF" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD > /tmp/pr-diff.txt
+          # Limit diff size for security
+          head -c 50000 /tmp/pr-diff.txt > /tmp/pr-diff-limited.txt
 
       - name: Analyze code with AI
         id: ai-analysis
@@ -48,7 +47,8 @@ jobs:
               return '';
             }
 
-            const prDiff = `${{ steps.pr-diff.outputs.diff }}`;
+            const fs = require('fs');
+            const prDiff = fs.readFileSync('/tmp/pr-diff-limited.txt', 'utf8');
             const prTitle = context.payload.pull_request.title;
             const prBody = context.payload.pull_request.body || '';
             
@@ -60,8 +60,8 @@ jobs:
             
             Be concise and constructive. Only comment if you find actual issues.
             
-            PR Title: ${prTitle}
-            PR Description: ${prBody}
+            PR Title: ${prTitle.substring(0, 200)}
+            PR Description: ${prBody.substring(0, 500)}
             
             Code Changes:
             ${prDiff.substring(0, 8000)}

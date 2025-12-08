@@ -60,6 +60,8 @@ SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_token
 SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
 ```
 
+**Note on `.vercel.json` environment references:** The `.vercel.json` file uses the `@variable_name` syntax to reference environment variables that should be configured in the Vercel dashboard. These are not literal values but references to environment variables you must set up in your Vercel project settings. For example, `"@company_name"` refers to a Vercel environment variable named `COMPANY_NAME`.
+
 Add any additional Phase 2 environment variables as needed:
 - `REWARDS_CONTRACT_ADDRESS`
 - `ALCHEMY_MUMBAI_URL` (or production URL)

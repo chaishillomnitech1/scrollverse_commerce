@@ -160,7 +160,12 @@ jobs:
           
           cd target-repo
           
-          if [ -n "$(git status --porcelain)" ] || [ -n "$(git log origin/${{ steps.sync-targets.outputs.sync_branch }}..${{ steps.sync-targets.outputs.sync_branch }} 2>/dev/null)" ]; then
+          # Check for local changes or commits ahead of remote
+          git fetch origin "${{ steps.sync-targets.outputs.sync_branch }}" 2>/dev/null || true
+          HAS_CHANGES=$(git status --porcelain)
+          HAS_COMMITS=$(git log origin/${{ steps.sync-targets.outputs.sync_branch }}..HEAD 2>/dev/null | wc -l || echo "0")
+          
+          if [ -n "$HAS_CHANGES" ] || [ "$HAS_COMMITS" -gt 0 ]; then
             echo "Pushing changes..."
             git push origin "${{ steps.sync-targets.outputs.sync_branch }}"
             echo "✅ Successfully synced to ${{ steps.sync-targets.outputs.target_repo }}"
