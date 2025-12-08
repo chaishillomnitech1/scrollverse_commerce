@@ -1,0 +1,198 @@
+name: Repository Sync
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: 'Target repository (owner/repo)'
+        required: true
+        default: 'chaishillomnitech1/scrollverse-hub'
+      sync_branch:
+        description: 'Branch to sync'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Sync to Related Repositories
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_PAT }}
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine sync targets
+        id: sync-targets
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_REPO="${{ github.event.inputs.target_repo }}"
+            SYNC_BRANCH="${{ github.event.inputs.sync_branch }}"
+          else
+            # Default sync targets for automatic syncing
+            TARGET_REPO="chaishillomnitech1/scrollverse-hub"
+            SYNC_BRANCH="main"
+          fi
+          
+          echo "target_repo=${TARGET_REPO}" >> $GITHUB_OUTPUT
+          echo "sync_branch=${SYNC_BRANCH}" >> $GITHUB_OUTPUT
+          echo "Syncing to: ${TARGET_REPO}:${SYNC_BRANCH}"
+
+      - name: Check if sync is needed
+        id: check-sync
+        run: |
+          # Get the last commit message
+          LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+          
+          # Skip sync if commit message contains [skip-sync] or [no-sync]
+          if echo "$LAST_COMMIT_MSG" | grep -qE "\[skip-sync\]|\[no-sync\]"; then
+            echo "sync_needed=false" >> $GITHUB_OUTPUT
+            echo "Sync skipped due to commit message flag"
+          else
+            echo "sync_needed=true" >> $GITHUB_OUTPUT
+            echo "Sync needed"
+          fi
+
+      - name: Extract syncable changes
+        id: extract-changes
+        if: steps.check-sync.outputs.sync_needed == 'true'
+        run: |
+          # Identify files/directories to sync
+          # Only sync specific directories that are relevant across repos
+          SYNC_DIRS=".github/workflows shared-config docs"
+          
+          echo "sync_dirs=${SYNC_DIRS}" >> $GITHUB_OUTPUT
+          
+          # Get list of changed files in last commit
+          CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check if any syncable files were changed
+          SYNCABLE_CHANGES=false
+          for dir in $SYNC_DIRS; do
+            if echo "$CHANGED_FILES" | grep -q "^${dir}/"; then
+              SYNCABLE_CHANGES=true
+              break
+            fi
+          done
+          
+          echo "syncable_changes=${SYNCABLE_CHANGES}" >> $GITHUB_OUTPUT
+
+      - name: Clone target repository
+        if: steps.check-sync.outputs.sync_needed == 'true' && steps.extract-changes.outputs.syncable_changes == 'true'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+        run: |
+          TARGET_REPO="${{ steps.sync-targets.outputs.target_repo }}"
+          
+          if [ -z "$GITHUB_PAT" ]; then
+            echo "⚠️ GITHUB_PAT not configured. Cannot sync to external repository."
+            exit 0
+          fi
+          
+          echo "Cloning ${TARGET_REPO}..."
+          git clone "https://x-access-token:${GITHUB_PAT}@github.com/${TARGET_REPO}.git" target-repo
+          cd target-repo
+          git checkout "${{ steps.sync-targets.outputs.sync_branch }}" || git checkout -b "${{ steps.sync-targets.outputs.sync_branch }}"
+
+      - name: Sync changes
+        if: steps.check-sync.outputs.sync_needed == 'true' && steps.extract-changes.outputs.syncable_changes == 'true'
+        run: |
+          if [ ! -d "target-repo" ]; then
+            echo "Target repository not cloned, skipping sync"
+            exit 0
+          fi
+          
+          SYNC_DIRS="${{ steps.extract-changes.outputs.sync_dirs }}"
+          
+          for dir in $SYNC_DIRS; do
+            if [ -d "$dir" ]; then
+              echo "Syncing ${dir}..."
+              mkdir -p "target-repo/${dir}"
+              cp -r "${dir}"/* "target-repo/${dir}/" || true
+            fi
+          done
+          
+          cd target-repo
+          
+          # Check if there are changes to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "sync: Update from scrollverse_commerce - $(git -C .. log -1 --pretty=%B | head -n1)"
+            echo "changes_made=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes to sync"
+            echo "changes_made=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push changes to target
+        if: steps.check-sync.outputs.sync_needed == 'true' && steps.extract-changes.outputs.syncable_changes == 'true'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+        run: |
+          if [ ! -d "target-repo" ]; then
+            exit 0
+          fi
+          
+          if [ -z "$GITHUB_PAT" ]; then
+            echo "⚠️ GITHUB_PAT not configured. Cannot push to external repository."
+            exit 0
+          fi
+          
+          cd target-repo
+          
+          if [ -n "$(git status --porcelain)" ] || [ -n "$(git log origin/${{ steps.sync-targets.outputs.sync_branch }}..${{ steps.sync-targets.outputs.sync_branch }} 2>/dev/null)" ]; then
+            echo "Pushing changes..."
+            git push origin "${{ steps.sync-targets.outputs.sync_branch }}"
+            echo "✅ Successfully synced to ${{ steps.sync-targets.outputs.target_repo }}"
+          else
+            echo "No changes to push"
+          fi
+
+      - name: Create sync report
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const syncNeeded = '${{ steps.check-sync.outputs.sync_needed }}';
+            const syncableChanges = '${{ steps.extract-changes.outputs.syncable_changes }}';
+            const targetRepo = '${{ steps.sync-targets.outputs.target_repo }}';
+            
+            let summary = '## 🔄 Repository Sync Report\n\n';
+            
+            if (syncNeeded === 'false') {
+              summary += '⏭️ Sync skipped due to [skip-sync] or [no-sync] flag in commit message.\n';
+            } else if (syncableChanges === 'false') {
+              summary += '📝 No syncable changes detected in this commit.\n';
+            } else {
+              summary += `✅ Changes synced to ${targetRepo}\n`;
+              summary += `📁 Synced directories: ${{ steps.extract-changes.outputs.sync_dirs }}\n`;
+            }
+            
+            console.log(summary);
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "✅ Repository sync workflow completed"
+          echo "🎯 Target: ${{ steps.sync-targets.outputs.target_repo }}"
+          echo "🌿 Branch: ${{ steps.sync-targets.outputs.sync_branch }}"
