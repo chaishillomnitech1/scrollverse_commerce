@@ -54,6 +54,7 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 > ⚠️ **Important**: Never commit your `.env` file as it contains sensitive credentials.
 
 Required environment variables:
+
 - `SHOPIFY_STORE_DOMAIN` - Your Shopify store domain
 - `SHOPIFY_STOREFRONT_ACCESS_TOKEN` - Storefront API access token
 - `SHOPIFY_REVALIDATION_SECRET` - Secret for webhook revalidation
@@ -110,6 +111,7 @@ Built on the foundation of [Vercel's Next.js Commerce](https://github.com/vercel
 ## 📞 Support
 
 For support and questions:
+
 - Open an [issue](https://github.com/chaishillomnitech1/scrollverse_commerce/issues)
 - Review existing [discussions](https://github.com/chaishillomnitech1/scrollverse_commerce/discussions)
 

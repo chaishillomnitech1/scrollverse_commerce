@@ -10,11 +10,11 @@ Security is a top priority for Scrollverse Commerce. We take all security vulner
 
 We actively support the following versions with security updates:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| main    | ✅ Yes             |
-| develop | ✅ Yes             |
-| < 1.0   | ⚠️ Best effort     |
+| Version | Supported      |
+| ------- | -------------- |
+| main    | ✅ Yes         |
+| develop | ✅ Yes         |
+| < 1.0   | ⚠️ Best effort |
 
 ## 🚨 Reporting a Vulnerability
 
@@ -138,6 +138,7 @@ Security updates will be:
 ## 📞 Contact
 
 For non-security questions:
+
 - Open an [issue](https://github.com/chaishillomnitech1/scrollverse_commerce/issues)
 - Start a [discussion](https://github.com/chaishillomnitech1/scrollverse_commerce/discussions)
 

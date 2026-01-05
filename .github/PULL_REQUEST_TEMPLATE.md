@@ -1,7 +1,7 @@
 ---
 name: Pull Request
 about: Submit a pull request for review
-title: '[PR] '
+title: "[PR] "
 assignees: chaishillomnitech1
 ---
 

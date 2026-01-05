@@ -7,6 +7,7 @@ Welcome to Scrollverse Commerce! This guide will help you get started as a new c
 ## 🎯 Overview
 
 Scrollverse Commerce is a high-performance Next.js ecommerce platform built with:
+
 - **Next.js 15** with App Router
 - **React 19** with Server Components
 - **TypeScript** for type safety
@@ -18,6 +19,7 @@ Scrollverse Commerce is a high-performance Next.js ecommerce platform built with
 ### 1. Prerequisites Check
 
 Ensure you have:
+
 - ✅ Node.js 18+ installed
 - ✅ pnpm package manager
 - ✅ Git configured
@@ -61,6 +63,7 @@ Visit [http://localhost:3000](http://localhost:3000) - you should see the store!
 ### 5. VS Code Setup (Recommended)
 
 Install these extensions:
+
 - ESLint
 - Prettier
 - Tailwind CSS IntelliSense
@@ -108,9 +111,9 @@ export default function ProductPage() {
 #### 2. Client Components
 
 ```typescript
-'use client'; // Required for interactivity
+"use client"; // Required for interactivity
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export function AddToCart() {
   const [count, setCount] = useState(0);
@@ -121,7 +124,7 @@ export function AddToCart() {
 #### 3. Server Actions
 
 ```typescript
-'use server';
+"use server";
 
 export async function addToCart(productId: string) {
   // Server-side logic
@@ -242,23 +245,28 @@ Install React DevTools extension for component debugging.
 ## 📚 Learning Resources
 
 ### Next.js
+
 - [Next.js Documentation](https://nextjs.org/docs)
 - [App Router Guide](https://nextjs.org/docs/app)
 - [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
 
 ### React
+
 - [React Documentation](https://react.dev)
 - [React Hooks](https://react.dev/reference/react)
 
 ### TypeScript
+
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [TypeScript with React](https://react.dev/learn/typescript)
 
 ### Tailwind CSS
+
 - [Tailwind Documentation](https://tailwindcss.com/docs)
 - [Tailwind UI Components](https://tailwindui.com)
 
 ### Shopify
+
 - [Storefront API](https://shopify.dev/docs/api/storefront)
 - [Headless Commerce](https://shopify.dev/docs/custom-storefronts)
 
@@ -339,6 +347,7 @@ Install React DevTools extension for component debugging.
 You're now part of the Scrollverse Commerce team! We're excited to have you contribute.
 
 Remember:
+
 - **Ask questions** - there are no dumb questions
 - **Be patient** - learning takes time
 - **Help others** - share what you learn

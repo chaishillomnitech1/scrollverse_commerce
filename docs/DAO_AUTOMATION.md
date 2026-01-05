@@ -36,13 +36,7 @@ Configure webhooks in: **Settings → Webhooks → Add webhook**
 {
   "url": "https://your-dao-endpoint.scrollverse.io/webhook",
   "content_type": "application/json",
-  "events": [
-    "pull_request",
-    "issues",
-    "push",
-    "release",
-    "member"
-  ],
+  "events": ["pull_request", "issues", "push", "release", "member"],
   "active": true,
   "secret": "YOUR_WEBHOOK_SECRET"
 }
@@ -112,7 +106,7 @@ jobs:
               "proposer": "${{ github.event.issue.user.login }}",
               "repository": "${{ github.repository }}"
             }'
-      
+
       - name: Comment Vote Instructions
         uses: actions/github-script@v7
         with:
@@ -148,7 +142,7 @@ jobs:
           MILESTONE_NUMBER=${{ github.event.milestone.number }}
           CONTRIBUTORS=$(gh api repos/${{ github.repository }}/milestones/${MILESTONE_NUMBER}/contributors)
           echo "contributors=${CONTRIBUTORS}" >> $GITHUB_OUTPUT
-      
+
       - name: Distribute Rewards
         run: |
           curl -X POST https://dao.scrollverse.io/api/rewards \
@@ -184,9 +178,9 @@ async function handleGitHubWebhook(event) {
     event_type: event.action,
     contributor: event.sender.login,
     // Event-specific data
-    ...extractMetrics(event)
+    ...extractMetrics(event),
   };
-  
+
   await sendToDAODashboard(metrics);
 }
 ```
@@ -349,18 +343,18 @@ module.exports = {
   governance: {
     votingPeriod: 7, // days
     quorum: 0.51, // 51%
-    proposalThreshold: 100 // tokens
+    proposalThreshold: 100, // tokens
   },
   rewards: {
     prMerge: 10, // tokens
     issueResolved: 5, // tokens
     securityFix: 50, // tokens
-    majorRelease: 100 // tokens
+    majorRelease: 100, // tokens
   },
   webhooks: {
     signature_header: "X-Hub-Signature-256",
-    verify: true
-  }
+    verify: true,
+  },
 };
 ```
 
@@ -381,6 +375,7 @@ module.exports = {
 ## 🆘 Support
 
 For DAO integration support:
+
 - Technical Issues: Contact @chaishillomnitech1
 - Platform Questions: dao-support@scrollverse.io
 - Documentation: https://dao.scrollverse.io/docs
@@ -389,4 +384,4 @@ For DAO integration support:
 
 **ALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN!** 🕋♾️✨
 
-*Note: Replace placeholder URLs and tokens with actual DAO platform endpoints and credentials when implementing.*
+_Note: Replace placeholder URLs and tokens with actual DAO platform endpoints and credentials when implementing._

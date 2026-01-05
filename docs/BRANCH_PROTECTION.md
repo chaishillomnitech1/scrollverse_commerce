@@ -170,6 +170,7 @@ For critical production issues:
 ### When to Bypass Protection
 
 Only in extreme cases:
+
 - Critical security vulnerability
 - Production down scenario
 - Data loss prevention

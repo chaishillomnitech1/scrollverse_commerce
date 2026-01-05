@@ -1,8 +1,8 @@
 ---
 name: Issue Template
 about: Create a detailed issue report
-title: '[ISSUE] '
-labels: ''
+title: "[ISSUE] "
+labels: ""
 assignees: chaishillomnitech1
 ---
 

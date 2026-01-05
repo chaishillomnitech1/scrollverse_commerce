@@ -21,6 +21,7 @@ We are committed to providing a welcoming and inclusive environment. Please be r
 ### Development Setup
 
 1. **Fork the Repository**
+
    ```bash
    # Fork via GitHub UI, then clone your fork
    git clone https://github.com/YOUR_USERNAME/scrollverse_commerce.git
@@ -28,16 +29,19 @@ We are committed to providing a welcoming and inclusive environment. Please be r
    ```
 
 2. **Add Upstream Remote**
+
    ```bash
    git remote add upstream https://github.com/chaishillomnitech1/scrollverse_commerce.git
    ```
 
 3. **Install Dependencies**
+
    ```bash
    pnpm install
    ```
 
 4. **Set Up Environment Variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your Shopify credentials
@@ -94,6 +98,7 @@ git commit -m "feat: add new feature"
 ```
 
 **Commit Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -219,6 +224,7 @@ We welcome feature suggestions! Please:
 ## 🏆 Recognition
 
 Contributors will be recognized in:
+
 - GitHub Contributors page
 - Release notes for significant contributions
 - Special mentions for outstanding contributions
