@@ -1,0 +1,37 @@
+# CODEOWNERS - Scrollverse Commerce
+# ALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN! 🕋♾️✨
+#
+# This file defines code ownership for the repository.
+# Code owners are automatically requested for review when someone opens a pull request.
+#
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+* @chaishillomnitech1
+
+# Core application files
+/app/ @chaishillomnitech1
+/components/ @chaishillomnitech1
+/lib/ @chaishillomnitech1
+
+# Configuration files
+*.config.* @chaishillomnitech1
+tsconfig.json @chaishillomnitech1
+package.json @chaishillomnitech1
+pnpm-lock.yaml @chaishillomnitech1
+
+# GitHub configuration
+/.github/ @chaishillomnitech1
+/.github/workflows/ @chaishillomnitech1
+/.github/CODEOWNERS @chaishillomnitech1
+
+# Documentation
+*.md @chaishillomnitech1
+/docs/ @chaishillomnitech1
+
+# Security and sensitive files
+SECURITY.md @chaishillomnitech1
+.env.example @chaishillomnitech1
+
+# Build and deployment
+/public/ @chaishillomnitech1
