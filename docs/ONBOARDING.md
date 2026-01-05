@@ -20,7 +20,7 @@ Scrollverse Commerce is a high-performance Next.js ecommerce platform built with
 
 Ensure you have:
 
-- ✅ Node.js 18+ installed
+- ✅ Node.js 18.17.0+ or Node.js 20+ installed
 - ✅ pnpm package manager
 - ✅ Git configured
 - ✅ GitHub account with access to the repo

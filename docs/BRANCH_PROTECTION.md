@@ -27,10 +27,10 @@ Configure these settings in: **Settings → Branches → Branch protection rules
 - ✅ **Require status checks to pass before merging**
   - Require branches to be up to date before merging: **Yes**
   - Required status checks:
-    - `CI - Install and Test / install-and-test (18.x)`
-    - `CI - Install and Test / install-and-test (20.x)`
-    - `Build / build (18.x)`
-    - `Build / build (20.x)`
+    - `Install Dependencies and Run Tests (18.x)`
+    - `Install Dependencies and Run Tests (20.x)`
+    - `Build Application (18.x)`
+    - `Build Application (20.x)`
 
 #### Additional Protections
 

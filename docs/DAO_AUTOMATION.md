@@ -138,9 +138,10 @@ jobs:
       - name: Calculate Contributions
         id: calculate
         run: |
-          # Fetch contributor stats for milestone
+          # Fetch PRs associated with this milestone
           MILESTONE_NUMBER=${{ github.event.milestone.number }}
-          CONTRIBUTORS=$(gh api repos/${{ github.repository }}/milestones/${MILESTONE_NUMBER}/contributors)
+          CONTRIBUTORS=$(gh api "repos/${{ github.repository }}/issues?milestone=${MILESTONE_NUMBER}&state=closed&per_page=100" \
+            --jq '[.[].user.login] | unique')
           echo "contributors=${CONTRIBUTORS}" >> $GITHUB_OUTPUT
 
       - name: Distribute Rewards
