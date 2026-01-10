@@ -1,0 +1,269 @@
+name: Repo Sync
+
+on:
+  # Allow manual trigger for pull sync
+  workflow_dispatch:
+    inputs:
+      sync_direction:
+        description: "Sync direction"
+        required: true
+        default: "pull"
+        type: choice
+        options:
+          - pull
+          - push
+      sync_branch:
+        description: "Branch to sync"
+        required: false
+        default: "main"
+        type: string
+
+  # Automatic push sync on main branch updates
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+      - "DEPLOYMENT.md"
+      - "SECURITY.md"
+
+  # Scheduled pull sync (weekly)
+  schedule:
+    - cron: "0 0 * * 0" # Every Sunday at midnight UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.REPO_SYNC_TOKEN || github.token }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine sync direction
+        id: direction
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            DIRECTION="${{ inputs.sync_direction }}"
+            BRANCH="${{ inputs.sync_branch }}"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            DIRECTION="push"
+            BRANCH="${{ github.ref_name }}"
+          else
+            DIRECTION="pull"
+            BRANCH="main"
+          fi
+
+          echo "direction=$DIRECTION" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "Sync direction: $DIRECTION"
+          echo "Branch: $BRANCH"
+
+      - name: Setup sync configuration
+        id: config
+        run: |
+          # Template repository configuration
+          TEMPLATE_REPO="omnitech-templates/repository-templates"
+          TEMPLATE_BRANCH="main"
+
+          # Files/directories to sync (relative paths)
+          # These are the centrally managed files
+          SYNC_PATHS=(
+            ".github/workflows/ai-pr-assistant.yml"
+            ".github/workflows/reward-allocation.yml"
+            ".github/workflows/repo-sync.yml"
+            "DEPLOYMENT.md"
+          )
+
+          echo "template_repo=$TEMPLATE_REPO" >> $GITHUB_OUTPUT
+          echo "template_branch=$TEMPLATE_BRANCH" >> $GITHUB_OUTPUT
+
+          # Convert array to comma-separated string
+          PATHS_STR=$(IFS=,; echo "${SYNC_PATHS[*]}")
+          echo "sync_paths=$PATHS_STR" >> $GITHUB_OUTPUT
+
+      - name: Pull from template repository
+        id: pull
+        if: steps.direction.outputs.direction == 'pull'
+        env:
+          TEMPLATE_REPO: ${{ steps.config.outputs.template_repo }}
+          TEMPLATE_BRANCH: ${{ steps.config.outputs.template_branch }}
+          SYNC_PATHS: ${{ steps.config.outputs.sync_paths }}
+        run: |
+          # Create a temporary directory for template repo
+          TEMP_DIR=$(mktemp -d)
+          echo "Cloning template repository..."
+
+          # Clone template repository (using token if available)
+          if [ ! -z "${{ secrets.REPO_SYNC_TOKEN }}" ]; then
+            git clone --depth 1 --branch $TEMPLATE_BRANCH \
+              https://x-access-token:${{ secrets.REPO_SYNC_TOKEN }}@github.com/$TEMPLATE_REPO.git \
+              "$TEMP_DIR"
+          else
+            echo "⚠️ REPO_SYNC_TOKEN not configured. Pull sync may fail for private repositories."
+            git clone --depth 1 --branch $TEMPLATE_BRANCH \
+              https://github.com/$TEMPLATE_REPO.git \
+              "$TEMP_DIR" || {
+                echo "Failed to clone template repository. It may be private or not exist yet."
+                echo "skipped=true" >> $GITHUB_OUTPUT
+                exit 0
+              }
+          fi
+
+          # Copy specified files/directories
+          IFS=',' read -ra PATHS <<< "$SYNC_PATHS"
+          CHANGES=false
+
+          for path in "${PATHS[@]}"; do
+            if [ -e "$TEMP_DIR/$path" ]; then
+              echo "Syncing: $path"
+              mkdir -p "$(dirname "$path")"
+              cp -r "$TEMP_DIR/$path" "$path"
+              CHANGES=true
+            else
+              echo "⚠️ Path not found in template: $path"
+            fi
+          done
+
+          # Clean up
+          rm -rf "$TEMP_DIR"
+
+          # Check if there are changes
+          if git diff --quiet; then
+            echo "No changes to sync"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push to template repository
+        id: push
+        if: steps.direction.outputs.direction == 'push'
+        env:
+          TEMPLATE_REPO: ${{ steps.config.outputs.template_repo }}
+          TEMPLATE_BRANCH: ${{ steps.config.outputs.template_branch }}
+          SYNC_PATHS: ${{ steps.config.outputs.sync_paths }}
+        run: |
+          # Validate token
+          if [ -z "${{ secrets.REPO_SYNC_TOKEN }}" ]; then
+            echo "⚠️ REPO_SYNC_TOKEN is required for push sync"
+            exit 1
+          fi
+
+          # Create a temporary directory for template repo
+          TEMP_DIR=$(mktemp -d)
+          echo "Cloning template repository..."
+
+          git clone --depth 1 --branch $TEMPLATE_BRANCH \
+            https://x-access-token:${{ secrets.REPO_SYNC_TOKEN }}@github.com/$TEMPLATE_REPO.git \
+            "$TEMP_DIR"
+
+          cd "$TEMP_DIR"
+
+          # Copy files from current repo to template
+          IFS=',' read -ra PATHS <<< "$SYNC_PATHS"
+          CHANGES=false
+
+          for path in "${PATHS[@]}"; do
+            SOURCE_PATH="${GITHUB_WORKSPACE}/$path"
+            if [ -e "$SOURCE_PATH" ]; then
+              echo "Pushing: $path"
+              mkdir -p "$(dirname "$path")"
+              cp -r "$SOURCE_PATH" "$path"
+              CHANGES=true
+            else
+              echo "⚠️ Path not found in source: $path"
+            fi
+          done
+
+          # Commit and push changes
+          git add .
+
+          if git diff --staged --quiet; then
+            echo "No changes to push"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "Sync from ${{ github.repository }}@${{ github.sha }}"
+            git push
+            echo "Changes pushed to template repository"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR for pulled changes
+        if: |
+          steps.direction.outputs.direction == 'pull' &&
+          steps.pull.outputs.has_changes == 'true' &&
+          steps.pull.outputs.skipped != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_TOKEN || github.token }}
+        run: |
+          # Create a new branch for the sync
+          SYNC_BRANCH="repo-sync/$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$SYNC_BRANCH"
+
+          # Commit changes
+          git add .
+          git commit -m "Sync from template repository
+
+          Synced files from ${{ steps.config.outputs.template_repo }}
+
+          This is an automated sync to keep workflows and documentation up to date."
+
+          # Push the branch
+          git push -u origin "$SYNC_BRANCH"
+
+          # Create pull request
+          gh pr create \
+            --title "🔄 Sync from template repository" \
+            --body "This PR syncs centrally managed files from the template repository.
+
+          ### Synced Files
+          - Workflow files
+          - Documentation
+          - Configuration files
+
+          ### Template Repository
+          Repository: \`${{ steps.config.outputs.template_repo }}\`
+          Branch: \`${{ steps.config.outputs.template_branch }}\`
+
+          ---
+          *This is an automated PR. Please review changes before merging.*" \
+            --label "repo-sync" \
+            --label "automation"
+
+      - name: Report sync status
+        if: always()
+        run: |
+          echo "### Repo Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Direction**: ${{ steps.direction.outputs.direction }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ steps.direction.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Template**: ${{ steps.config.outputs.template_repo }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.direction.outputs.direction }}" == "pull" ]; then
+            if [ "${{ steps.pull.outputs.has_changes }}" == "true" ]; then
+              echo "- **Result**: Changes detected and PR created" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Result**: No changes to sync" >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [ "${{ steps.direction.outputs.direction }}" == "push" ]; then
+            if [ "${{ steps.push.outputs.has_changes }}" == "true" ]; then
+              echo "- **Result**: Changes pushed to template" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Result**: No changes to push" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
