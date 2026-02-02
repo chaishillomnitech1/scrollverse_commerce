@@ -1,0 +1,36 @@
+{
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["iad1"],
+  "env": {
+    "COMPANY_NAME": "@company_name",
+    "SITE_NAME": "@site_name",
+    "SHOPIFY_REVALIDATION_SECRET": "@shopify_revalidation_secret",
+    "SHOPIFY_STOREFRONT_ACCESS_TOKEN": "@shopify_storefront_access_token",
+    "SHOPIFY_STORE_DOMAIN": "@shopify_store_domain"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ],
+  "redirects": [],
+  "rewrites": []
+}
