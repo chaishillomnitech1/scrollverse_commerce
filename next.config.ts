@@ -1,4 +1,7 @@
 export default {
+  experimental: {
+    useCache: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
