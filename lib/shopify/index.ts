@@ -62,7 +62,8 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
   : "";
 const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
-const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
+const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+const shopifyConfigured = Boolean(domain && key);
 
 type ExtractVariables<T> = T extends { variables: object }
   ? T["variables"]
@@ -77,6 +78,33 @@ export async function shopifyFetch<T>({
   query: string;
   variables?: ExtractVariables<T>;
 }): Promise<{ status: number; body: T } | never> {
+  if (!shopifyConfigured) {
+    if (query.trimStart().startsWith("mutation")) {
+      throw new Error("Shopify Storefront API credentials are not configured.");
+    }
+
+    console.warn(
+      "Shopify Storefront API is not configured; returning an empty catalog response.",
+    );
+
+    return {
+      status: 503,
+      body: {
+        data: {
+          collection: null,
+          collections: { edges: [] },
+          menu: { items: [] },
+          pageByHandle: null,
+          pages: { edges: [] },
+          products: { edges: [] },
+          product: null,
+          productRecommendations: [],
+          cart: null,
+        },
+      } as unknown as T,
+    };
+  }
+
   try {
     const result = await fetch(endpoint, {
       method: "POST",
