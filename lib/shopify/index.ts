@@ -62,7 +62,7 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
   : "";
 const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
-const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "";
 const shopifyConfigured = Boolean(domain && key);
 
 type ExtractVariables<T> = T extends { variables: object }
