@@ -318,7 +318,12 @@ export async function getCollectionProducts({
   sortKey?: string;
 }): Promise<Product[]> {
   return withShopifyCache(
-    ["getCollectionProducts", collection, String(reverse ?? ""), sortKey ?? ""],
+    [
+      "getCollectionProducts",
+      collection,
+      String(reverse ?? ""),
+      sortKey ?? "",
+    ],
     [TAGS.collections, TAGS.products],
     async () => {
       const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
@@ -350,7 +355,9 @@ export async function getCollections(): Promise<Collection[]> {
       const res = await shopifyFetch<ShopifyCollectionsOperation>({
         query: getCollectionsQuery,
       });
-      const shopifyCollections = removeEdgesAndNodes(res.body?.data?.collections);
+      const shopifyCollections = removeEdgesAndNodes(
+        res.body?.data?.collections,
+      );
       return [
         {
           handle: "",
@@ -383,13 +390,15 @@ export async function getMenu(handle: string): Promise<Menu[]> {
         variables: { handle },
       });
       return (
-        res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
+        res.body?.data?.menu?.items.map(
+          (item: { title: string; url: string }) => ({
           title: item.title,
           path: item.url
             .replace(domain, "")
             .replace("/collections", "/search")
             .replace("/pages", ""),
-        })) || []
+          }),
+        ) || []
       );
     },
   );
@@ -452,7 +461,12 @@ export async function getProducts({
   sortKey?: string;
 }): Promise<Product[]> {
   return withShopifyCache(
-    ["getProducts", query ?? "", String(reverse ?? ""), sortKey ?? ""],
+    [
+      "getProducts",
+      query ?? "",
+      String(reverse ?? ""),
+      sortKey ?? "",
+    ],
     [TAGS.products],
     async () => {
       const res = await shopifyFetch<ShopifyProductsOperation>({
