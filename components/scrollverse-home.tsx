@@ -2,7 +2,8 @@ const HOME = "https://scrollverse.co";
 
 const destinations = [
   { title: "Exchange", detail: "Market research, digital-asset readiness, and the ScrollVerse exchange pathway.", href: HOME + "/exchange", tag: "EXCHANGE" },
-  { title: "Crypto & currencies", detail: "Explore the existing crypto hub and currency routes.", href: HOME + "/crypto", tag: "WEB3" },
+  { title: "Crypto hub", detail: "Explore the existing crypto hub and digital-asset readiness route.", href: HOME + "/crypto", tag: "WEB3" },
+  { title: "Currency exchange", detail: "Open the existing fiat and digital currency route.", href: HOME + "/exchange/currencies", tag: "CURRENCIES" },
   { title: "Staking", detail: "Open the existing staking experience and its current release state.", href: HOME + "/staking", tag: "ON-CHAIN" },
   { title: "Payment choices", detail: "See public provider destinations and clearly labeled release-required lanes.", href: HOME + "/payment-options", tag: "PAYMENTS" },
 ];
@@ -12,6 +13,7 @@ const worlds = [
   { title: "Omniland", detail: "Enter the consoleless world concept and its connected story pathways.", href: HOME + "/omniland-cinematic-gateway", tag: "IMMERSIVE WORLDS" },
   { title: "Books & media", detail: "Discover reading, listening, film, and creator-led media routes.", href: HOME + "/books-media-readiness", tag: "LIBRARY" },
   { title: "Sovereign Codex", detail: "Explore the wider ScrollVerse knowledge and architecture.", href: HOME + "/sovereign-codex", tag: "KNOWLEDGE" },
+  { title: "Shop & editions", detail: "Open the connected commerce catalog and existing product routes.", href: "/search", tag: "DIRECT TO CUSTOMER" },
 ];
 
 const paymentLanes = [
