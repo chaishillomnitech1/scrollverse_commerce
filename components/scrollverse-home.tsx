@@ -54,6 +54,7 @@ export default function ScrollVerseHome() {
         <div className="mx-auto grid max-w-7xl gap-12 px-6 pb-24 pt-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-32 lg:pt-16">
           <div>
             <p className="text-xs font-semibold tracking-[0.32em] text-cyan-200">A LIVING DIGITAL ECOSYSTEM · DIRECT TO YOU</p>
+            <p className="mt-3 text-[10px] font-semibold tracking-[0.24em] text-amber-200">TRUST BEHIND THE VEIL · PROOF IN EVERY ROUTE</p>
             <h1 className="mt-7 max-w-4xl text-5xl font-black leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl">Enter the <span className="bg-gradient-to-r from-cyan-200 via-white to-amber-200 bg-clip-text text-transparent">ScrollVerse.</span></h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-200">A connected universe for discovery, creator-owned media, books, visual worlds, commerce, digital identity, and Web3 pathways. Explore freely. Choose your route. Follow the evidence.</p>
             <div className="mt-9 flex flex-wrap gap-4">
