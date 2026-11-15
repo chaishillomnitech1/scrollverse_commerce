@@ -318,12 +318,7 @@ export async function getCollectionProducts({
   sortKey?: string;
 }): Promise<Product[]> {
   return withShopifyCache(
-    [
-      "getCollectionProducts",
-      collection,
-      String(reverse ?? ""),
-      sortKey ?? "",
-    ],
+    ["getCollectionProducts", collection, String(reverse ?? ""), sortKey ?? ""],
     [TAGS.collections, TAGS.products],
     async () => {
       const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
@@ -348,60 +343,50 @@ export async function getCollectionProducts({
 }
 
 export async function getCollections(): Promise<Collection[]> {
-  return withShopifyCache(
-    ["getCollections"],
-    [TAGS.collections],
-    async () => {
-      const res = await shopifyFetch<ShopifyCollectionsOperation>({
-        query: getCollectionsQuery,
-      });
-      const shopifyCollections = removeEdgesAndNodes(
-        res.body?.data?.collections,
-      );
-      return [
-        {
-          handle: "",
+  return withShopifyCache(["getCollections"], [TAGS.collections], async () => {
+    const res = await shopifyFetch<ShopifyCollectionsOperation>({
+      query: getCollectionsQuery,
+    });
+    const shopifyCollections = removeEdgesAndNodes(res.body?.data?.collections);
+    return [
+      {
+        handle: "",
+        title: "All",
+        description: "All products",
+        seo: {
           title: "All",
           description: "All products",
-          seo: {
-            title: "All",
-            description: "All products",
-          },
-          path: "/search",
-          updatedAt: new Date().toISOString(),
         },
-        // Filter out the hidden collections.
-        // Collections that start with hidden-* need to be hidden on the search page.
-        ...reshapeCollections(shopifyCollections).filter(
-          (collection) => !collection.handle.startsWith("hidden"),
-        ),
-      ];
-    },
-  );
+        path: "/search",
+        updatedAt: new Date().toISOString(),
+      },
+      // Filter out the hidden collections.
+      // Collections that start with hidden-* need to be hidden on the search page.
+      ...reshapeCollections(shopifyCollections).filter(
+        (collection) => !collection.handle.startsWith("hidden"),
+      ),
+    ];
+  });
 }
 
 export async function getMenu(handle: string): Promise<Menu[]> {
-  return withShopifyCache(
-    ["getMenu", handle],
-    [TAGS.collections],
-    async () => {
-      const res = await shopifyFetch<ShopifyMenuOperation>({
-        query: getMenuQuery,
-        variables: { handle },
-      });
-      return (
-        res.body?.data?.menu?.items.map(
-          (item: { title: string; url: string }) => ({
-            title: item.title,
-            path: item.url
+  return withShopifyCache(["getMenu", handle], [TAGS.collections], async () => {
+    const res = await shopifyFetch<ShopifyMenuOperation>({
+      query: getMenuQuery,
+      variables: { handle },
+    });
+    return (
+      res.body?.data?.menu?.items.map(
+        (item: { title: string; url: string }) => ({
+          title: item.title,
+          path: item.url
             .replace(domain, "")
             .replace("/collections", "/search")
             .replace("/pages", ""),
-          }),
-        ) || []
-      );
-    },
-  );
+        }),
+      ) || []
+    );
+  });
 }
 
 export async function getPage(handle: string): Promise<Page> {
@@ -422,17 +407,13 @@ export async function getPages(): Promise<Page[]> {
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
-  return withShopifyCache(
-    ["getProduct", handle],
-    [TAGS.products],
-    async () => {
-      const res = await shopifyFetch<ShopifyProductOperation>({
-        query: getProductQuery,
-        variables: { handle },
-      });
-      return reshapeProduct(res.body.data.product, false);
-    },
-  );
+  return withShopifyCache(["getProduct", handle], [TAGS.products], async () => {
+    const res = await shopifyFetch<ShopifyProductOperation>({
+      query: getProductQuery,
+      variables: { handle },
+    });
+    return reshapeProduct(res.body.data.product, false);
+  });
 }
 
 export async function getProductRecommendations(
@@ -461,12 +442,7 @@ export async function getProducts({
   sortKey?: string;
 }): Promise<Product[]> {
   return withShopifyCache(
-    [
-      "getProducts",
-      query ?? "",
-      String(reverse ?? ""),
-      sortKey ?? "",
-    ],
+    ["getProducts", query ?? "", String(reverse ?? ""), sortKey ?? ""],
     [TAGS.products],
     async () => {
       const res = await shopifyFetch<ShopifyProductsOperation>({
