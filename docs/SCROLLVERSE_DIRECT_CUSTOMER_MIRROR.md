@@ -11,7 +11,7 @@
 - The primary ScrollVerse.co site and `scrollverse-web-app` remain the source for the existing ecosystem routes.
 - Original artwork and media are not copied, recompressed, renamed, or overwritten by this change.
 - The current hero image uses the already-published ScrollVerse Trinity Empire asset referenced by the core repository README.
-- The customer mirror links to the original site's routes for Exchange, Crypto, Staking, Payment Options, Evolution Lookbook, Omniland, Books & Media, Sovereign Codex, Site Map, and Direct-to-Fan Catalog.
+- The customer mirror links to the original site's routes for Exchange, Crypto, Staking, Currency Exchange, Payment Options, Evolution Lookbook, Omniland, Books & Media, Sovereign Codex, Site Map, and Direct-to-Fan Catalog. The local `/search` route remains the commerce catalog entry.
 
 ## Customer experience
 
