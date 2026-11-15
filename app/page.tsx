@@ -1,21 +1,17 @@
-import { Carousel } from "components/carousel";
-import { ThreeItemGrid } from "components/grid/three-items";
-import Footer from "components/layout/footer";
+import ScrollVerseHome from "components/scrollverse-home";
 
 export const metadata = {
+  title: "ScrollVerse — Enter the Living Digital Ecosystem",
   description:
-    "High-performance ecommerce store built with Next.js, Vercel, and Shopify.",
+    "Discover ScrollVerse worlds, creator-owned media, lookbooks, commerce, exchange pathways, and Web3 readiness.",
   openGraph: {
-    type: "website",
+    type: "website" as const,
+    title: "ScrollVerse — Enter the Living Digital Ecosystem",
+    description:
+      "A connected customer experience for ScrollVerse discovery, media, commerce, and Web3 pathways.",
   },
 };
 
 export default function HomePage() {
-  return (
-    <>
-      <ThreeItemGrid />
-      <Carousel />
-      <Footer />
-    </>
-  );
+  return <ScrollVerseHome />;
 }
