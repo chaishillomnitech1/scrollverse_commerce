@@ -117,7 +117,7 @@ export async function shopifyFetch<T>({
       ? { "Shopify-Storefront-Private-Token": privateKey }
       : { "X-Shopify-Storefront-Access-Token": publicKey };
 
-    if (privateKey) {
+    if (privateKey && query.trimStart().startsWith("mutation")) {
       try {
         const incomingHeaders = await requestHeaders();
         const buyerIp =
