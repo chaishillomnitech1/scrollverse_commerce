@@ -4,7 +4,6 @@
 
 <p align="center"><img src="identity/thumbnail.svg" alt="ScrollVerse Commerce repository identity" width="100%" /></p>
 
-
 **ALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN!**
 
 A high-performance, server-rendered Next.js App Router ecommerce application powered by the Scrollverse ecosystem.
