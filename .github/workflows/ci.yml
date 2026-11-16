@@ -33,21 +33,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Format remaining CI-reported files for repair review
-        run: pnpm exec prettier --write docs/SCROLLVERSE_DIRECT_CUSTOMER_MIRROR.md README.md
-
-      - name: Verify formatted files
-        run: pnpm exec prettier --check docs/SCROLLVERSE_DIRECT_CUSTOMER_MIRROR.md README.md
-
-      - name: Upload formatted repair files
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: prettier-repair-followup-${{ github.run_id }}-${{ matrix.node-version }}
-          path: |
-            docs/SCROLLVERSE_DIRECT_CUSTOMER_MIRROR.md
-            README.md
-          retention-days: 1
+      - name: Run linter/formatter check
+        run: pnpm prettier:check
 
       - name: Run tests
         run: pnpm test
