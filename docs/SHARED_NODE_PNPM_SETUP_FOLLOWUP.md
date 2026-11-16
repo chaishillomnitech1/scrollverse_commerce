@@ -59,7 +59,7 @@ Revert the two workflow edits to restore their former inline setup steps. The sh
 
 ## PR #77 validation results
 
-Head commit: `fb5cda7aabbad413f65c54cbb07df4e6bd9d3ecd`.
+Workflow-tested implementation commit: `fb5cda7aabbad413f65c54cbb07df4e6bd9d3ecd` (subsequent commits on this PR only update the evidence document).
 
 - **Security Scan — PASS:** [run #41](https://github.com/chaishillomnitech1/scrollverse_commerce/actions/runs/43903424571). Dependency Security Scan, CodeQL Analysis, and Secret Scanning all completed successfully. The dependency-scan job loaded the shared composite action and installed frozen dependencies successfully.
 - **Build — PASS:** [run #56](https://github.com/chaishillomnitech1/scrollverse_commerce/actions/runs/43903424414). Build completed successfully on Node 18 and Node 20; both jobs loaded the shared action and installed frozen dependencies.
