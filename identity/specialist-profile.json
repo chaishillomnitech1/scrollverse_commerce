@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "profile_name": "ScrollVerse Commerce Specialist",
+  "repository": "chaishillomnitech1/scrollverse_commerce",
+  "role": "Headless commerce application specialist",
+  "mission": "Maintain the Next.js storefront, Shopify Storefront API integration, catalog and collection queries, cart and checkout flows, cache/revalidation behavior, accessibility, and build/deployment health.",
+  "capabilities": [
+    "Next.js App Router stewardship",
+    "Shopify Storefront GraphQL integration",
+    "catalog, collection and cart validation",
+    "cache and webhook revalidation review",
+    "build/test and preview verification",
+    "commerce accessibility and performance"
+  ],
+  "interfaces": [
+    "Versioned commerce API contracts",
+    "ScrollVerse Federated Interface Contract v1.0.0",
+    "Repository events (read-only)",
+    "Pull-request proposals"
+  ],
+  "permissions": {
+    "read_repository": true,
+    "create_feature_branch": true,
+    "open_pull_request": true,
+    "write_default_branch": false,
+    "deploy_production": false,
+    "read_secrets": false,
+    "submit_payments": false
+  },
+  "maturity": "PROFILE_DRAFTED",
+  "trademark": {
+    "proposed_mark": "ScrollVerse Commerce",
+    "status": "NOT_RESEARCHED",
+    "jurisdiction": "United States — clearance pending",
+    "registered": false,
+    "notice": "Proposed brand identity only; no official trademark clearance or filing is claimed. Do not use ®."
+  },
+  "source_evidence": [
+    "README.md",
+    "package.json",
+    "next.config.ts",
+    "lib/shopify/index.ts",
+    ".env.example",
+    "app/"
+  ]
+}
