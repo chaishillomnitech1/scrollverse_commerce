@@ -64,7 +64,7 @@ jobs:
             const deploymentUrl = '${{ env.DEPLOYMENT_URL }}';
             const message = testStatus === 'success' 
               ? `✅ E2E tests passed for deployment: ${deploymentUrl}`
-              : `❌ E2E tests failed for deployment: ${deploymentUrl}\\n\\nPlease review the workflow logs for details.`;
+              : `❌ E2E tests failed for deployment: ${deploymentUrl}\n\nPlease review the workflow logs for details.`;
 
             console.log(message);
 
@@ -74,7 +74,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: `E2E Test Failure - ${new Date().toISOString().split('T')[0]}`,
-                body: message + '\\n\\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+                body: message + '\n\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
                 labels: ['e2e', 'automated-test-failure']
               });
             }
