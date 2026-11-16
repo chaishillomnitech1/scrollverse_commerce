@@ -1,8 +1,8 @@
 # Build Toolchain Consolidation — Reusable Node.js and pnpm Setup
 
-**Status:** Isolated implementation proposal; awaiting pull-request CI and review.  
-**Date:** 2026-11-16  
-**Base:** `main`  
+**Status:** Isolated implementation proposal; awaiting pull-request CI and review.
+**Date:** 2026-11-16
+**Base:** `main`
 **Branch:** `ops/reusable-node-pnpm-setup-2026-11-16`
 
 ## Evidence that motivated the change
@@ -15,7 +15,7 @@ The prior `vercel-deploy.yml` separately installed Node, pnpm, resolved the pnpm
 
 Added one local composite action:
 
-` .github/actions/setup-node-pnpm/action.yml `
+`.github/actions/setup-node-pnpm/action.yml`
 
 It accepts explicit `node-version` and optional `pnpm-version` inputs, installs pnpm, then configures Node.js with the built-in pnpm lockfile cache.
 
