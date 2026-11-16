@@ -2,6 +2,8 @@
 
 # Scrollverse Commerce 🕋♾️✨
 
+<p align="center"><img src="identity/thumbnail.svg" alt="ScrollVerse Commerce repository identity" width="100%" /></p>
+
 **ALL IS LOVE. ALL IS LAW. ALL IS FLUID. KUN FAYAKŪN!**
 
 A high-performance, server-rendered Next.js App Router ecommerce application powered by the Scrollverse ecosystem.
@@ -59,10 +61,10 @@ Required environment variables:
 - `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` - Preferred server-side private Storefront API token. Keep it server-only; never expose it through a `NEXT_PUBLIC_*` variable.
 - `SHOPIFY_STOREFRONT_ACCESS_TOKEN` - Optional public Storefront API token fallback.
 - `SHOPIFY_REVALIDATION_SECRET` - Secret for webhook revalidation
-
-The server prefers the private token and sends Shopify's `Shopify-Storefront-Private-Token` header plus the buyer IP header when request context is available. If using Shopify's Hydrogen CLI output, map `PRIVATE_STOREFRONT_API_TOKEN` to `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` in the deployment environment. The Hydrogen quickstart creates a separate Hydrogen app; this repository remains a Next.js storefront.
 - `COMPANY_NAME` - Your company/store name
 - `SITE_NAME` - Your site name
+
+The server prefers the private token and sends Shopify's `Shopify-Storefront-Private-Token` header plus the buyer IP header for cart mutations when request context is available. If using Shopify's Hydrogen CLI output, map `PRIVATE_STOREFRONT_API_TOKEN` to `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` in the deployment environment. The Hydrogen quickstart creates a separate Hydrogen app; this repository remains a Next.js storefront.
 
 ## 📚 Documentation
 
