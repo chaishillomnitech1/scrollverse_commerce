@@ -16,6 +16,7 @@
 ## Customer experience
 
 The new home page introduces:
+
 - ScrollVerse identity and a responsive customer-facing hero.
 - Discover pathways for lookbooks, motion studies, immersive worlds, books, media, and the Codex.
 - Direct links to the existing Exchange, Crypto, Staking, and payment-option routes.
@@ -25,6 +26,7 @@ The new home page introduces:
 ## Payment destination evidence
 
 The existing Phase 415 visitor-choice audit records:
+
 - Cash App: owner-stated public handoff for `$chaisthegreat28`; visitors independently verify the provider destination; ScrollVerse does not process or confirm the external transfer.
 - PayPal: no confirmed public destination; owner release required.
 - Chime: no confirmed public destination; owner release required.
