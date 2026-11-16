@@ -56,8 +56,11 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 Required environment variables:
 
 - `SHOPIFY_STORE_DOMAIN` - Your Shopify store domain
-- `SHOPIFY_STOREFRONT_ACCESS_TOKEN` - Storefront API access token
+- `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` - Preferred server-side private Storefront API token. Keep it server-only; never expose it through a `NEXT_PUBLIC_*` variable.
+- `SHOPIFY_STOREFRONT_ACCESS_TOKEN` - Optional public Storefront API token fallback.
 - `SHOPIFY_REVALIDATION_SECRET` - Secret for webhook revalidation
+
+The server prefers the private token and sends Shopify's `Shopify-Storefront-Private-Token` header plus the buyer IP header when request context is available. If using Shopify's Hydrogen CLI output, map `PRIVATE_STOREFRONT_API_TOKEN` to `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` in the deployment environment. The Hydrogen quickstart creates a separate Hydrogen app; this repository remains a Next.js storefront.
 - `COMPANY_NAME` - Your company/store name
 - `SITE_NAME` - Your site name
 
