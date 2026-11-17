@@ -10,7 +10,7 @@ import {
   unstable_cacheTag as cacheTag,
   unstable_cacheLife as cacheLife,
 } from "next/cache";
-import { cookies, headers } from "next/headers";
+import { cookies, headers as requestHeaders } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import {
   addToCartMutation,
@@ -62,8 +62,15 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
   : "";
 const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
-const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "";
-const shopifyConfigured = Boolean(domain && key);
+const publicKey =
+  process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN ??
+  process.env.PUBLIC_STOREFRONT_API_TOKEN ??
+  "";
+const privateKey =
+  process.env.SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN ??
+  process.env.PRIVATE_STOREFRONT_API_TOKEN ??
+  "";
+const shopifyConfigured = Boolean(domain && (privateKey || publicKey));
 
 type ExtractVariables<T> = T extends { variables: object }
   ? T["variables"]
@@ -106,11 +113,30 @@ export async function shopifyFetch<T>({
   }
 
   try {
+    const authHeaders: Record<string, string> = privateKey
+      ? { "Shopify-Storefront-Private-Token": privateKey }
+      : { "X-Shopify-Storefront-Access-Token": publicKey };
+
+    if (privateKey && query.trimStart().startsWith("mutation")) {
+      try {
+        const incomingHeaders = await requestHeaders();
+        const buyerIp =
+          incomingHeaders.get("x-real-ip") ??
+          incomingHeaders.get("x-forwarded-for")?.split(",")[0]?.trim();
+
+        if (buyerIp) {
+          authHeaders["Shopify-Storefront-Buyer-IP"] = buyerIp;
+        }
+      } catch {
+        // Static generation and non-request contexts don't have a buyer IP.
+      }
+    }
+
     const result = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": key,
+        ...authHeaders,
         ...headers,
       },
       body: JSON.stringify({
@@ -502,7 +528,7 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     "products/delete",
     "products/update",
   ];
-  const topic = (await headers()).get("x-shopify-topic") || "unknown";
+  const topic = (await requestHeaders()).get("x-shopify-topic") || "unknown";
   const secret = req.nextUrl.searchParams.get("secret");
   const isCollectionUpdate = collectionWebhooks.includes(topic);
   const isProductUpdate = productWebhooks.includes(topic);
